@@ -1,0 +1,4 @@
+americas
+asia
+europe
+sea
