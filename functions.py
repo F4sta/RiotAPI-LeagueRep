@@ -15,26 +15,45 @@ def riot_request(api_url: str, params:dict):
     except requests.exceptions.RequestException as e:
         print(e)
         return None
-    
-def get_champion_info(champion: str):
-    try:
-        res = requests.get(f"http://ddragon.leagueoflegends.com/cdn/13.21.1/data/en_US/champion/{champion}.json")
-        res.raise_for_status()
-        return res.json()
-    except requests.exceptions.RequestException as e:
-        return None
 
 def get_champion_assets_link(champion: str):
+    """
+    Gets links for champion assets
+    :return: Dictionary of assets link for a champion.
+    """
     return {
         "splash_art" : f"http://ddragon.leagueoflegends.com/cdn/img/champion/splash/{champion}_0.jpg",
         "loading_screen" : f"http://ddragon.leagueoflegends.com/cdn/img/champion/loading/{champion}_0.jpg",
         "square" : f"http://ddragon.leagueoflegends.com/cdn/13.21.1/img/champion/{champion}.png"
     }
 
-def get_user_info_by_name(summoner_name: str = None, region_code: str = DEFAULT_REGION_CODE):
+def get_champion_data(champion: str):
+    """
+    Gets datas from an exact champion
+    """
+
+    params = {
+        "api_key" : API_KEY
+    }
+
+    api_url = f"http://ddragon.leagueoflegends.com/cdn/13.21.1/data/en_US/champion/{champion}.json"
+    
+    return riot_request(api_url, params)
+
+def get_summoner_icon_by_id(id: int | str):
+    '''
+    Returns the link for a specified icon by their id
+    '''
+    if not id:
+        id = input("Icon ID: ")
+        
+    api_url = f"http://ddragon.leagueoflegends.com/cdn/13.21.1/img/profileicon/{id}.png"
+    
+    return requests.get(api_url).json()
+
+def get_summoner_info_by_name(summoner_name: str = None, region_code: str = DEFAULT_REGION_CODE):
     '''
     Gets infromation about a summoner by their name
-    :return: Information about the summoner or None if there is an issue
     '''
     if not summoner_name:
         summoner_name = input("Enter summoner namme: ")
@@ -56,16 +75,11 @@ def get_match_ids_by_summoner_puuid(puuid: str, matches_count: int = 20, region:
         region (str): The region where the summoner located.
         matches_count (int = 0-100): The number of match ids to return.
         
-    Returns:
-        List | None: List of match IDs if succesful, None if there is an issue.
-    
     Example:
         get_match_ids_by_summoner_puuid(sample_puuid, 100, "europe")
-    
     '''
     if not puuid:
-        puuid = input("Enter summoner PUUID: ")
-        
+        puuid = input("Enter summoner PUUID: ")   
     params = {
         "api_key" : API_KEY,
         "count" : matches_count
@@ -75,11 +89,10 @@ def get_match_ids_by_summoner_puuid(puuid: str, matches_count: int = 20, region:
     
     return riot_request(api_url, params)
 
-def get_match_info_by_match_id(match_id: str, region: str = DEFAULT_REGION):
+def get_match_data_by_match_id(match_id: str, region: str = DEFAULT_REGION):
     ''' 
-    
+    Gets data from a specific match by its id
     '''
-
     if not match_id:
         match_id = input("Enter match ID: ")
         
@@ -93,9 +106,8 @@ def get_match_info_by_match_id(match_id: str, region: str = DEFAULT_REGION):
 
 def get_active_game_by_user_id(id: str, region_code: str = DEFAULT_REGION_CODE):
     '''
-    
+    Checks if a summoner is ingame by their id
     '''
-    
     if not id:
         id = input("Enter user ID: ")
         
@@ -105,61 +117,21 @@ def get_active_game_by_user_id(id: str, region_code: str = DEFAULT_REGION_CODE):
 
     api_url = f"https://{region_code}.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/{id}"
     
-    try:
-        res = requests.get(api_url, params=urlencode(params))
-        res.raise_for_status()
-        return res.json()
-    except requests.exceptions.RequestException as e:
-        return None
+    return riot_request(api_url, params)
 
-def get_summoner_icon_by_id(id: int | str):
-    '''
-    
-    '''
-    
-    if not id:
-        id = input("Icon ID: ")
-        
-    api_url = f"http://ddragon.leagueoflegends.com/cdn/13.21.1/img/profileicon/{id}.png"
-    
-    return requests.get(api_url).json()
+def get_ranked_data(id: str, region_code: str = DEFAULT_REGION_CODE):
+    """
+    Returns an summoner ranked stats by their id
+    """
+    api_url = f"https://{region_code}.api.riotgames.com/lol/league/v4/entries/by-summoner/{id}"
+
+    params ={
+        "api_key" : API_KEY
+    }
+            
+    return riot_request(api_url, params)
 
 
-
-
-
-
-
-
-
-
-''' profile = get_user_info_by_name("Rattataaa")
-save_dict(profile, "profile")
-
-match_ids = get_match_ids_by_summoner_puuid(profile["puuid"], 100)
-save_dict(match_ids, "match_ids")
-
-match_info = get_match_info_by_match_id(match_ids[1])
-save_dict(match_info, "match_info")
-
-items = requests.get("http://ddragon.leagueoflegends.com/cdn/13.21.1/data/en_US/item.json").json()
-save_dict(items, "items")
-
-champions = requests.get("http://ddragon.leagueoflegends.com/cdn/13.21.1/data/en_US/champion.json").json()
-save_dict(champions, "champions")
-
-active_game = get_active_game_by_user_id(profile["id"])
-save_dict(active_game, "active_game") '''
-
-''' for Champion in champions["data"]:
-    id = champions["data"][Champion]["id"]
-    name = champions["data"][Champion]["name"]
-    try:
-        Champion = requests.get(f"http://ddragon.leagueoflegends.com/cdn/13.21.1/data/en_US/champion/{id}.json").json()
-        save_dict(dict=Champion, name=f'{id}', save_folder="saved/Champions/")
-    except:
-        raise Exception
-'''
 
 '''
 
