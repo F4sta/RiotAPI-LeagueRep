@@ -123,12 +123,13 @@ def get_ranked_data(id: str, region_code: str = DEFAULT_REGION_CODE):
     """
     Returns an summoner ranked stats by their id
     """
-    api_url = f"https://{region_code}.api.riotgames.com/lol/league/v4/entries/by-summoner/{id}"
-
+    
     params ={
         "api_key" : API_KEY
     }
-            
+
+    api_url = f"https://{region_code}.api.riotgames.com/lol/league/v4/entries/by-summoner/{id}"
+
     return riot_request(api_url, params)
 
 
