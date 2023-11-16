@@ -1,4 +1,4 @@
-
+from sys import argv
 import json
 
 from constans import *
@@ -35,7 +35,7 @@ class Summoner():
         self.region_code   = region_code
         
         #Getting datas from ""
-        self.profile = get_summoner_info_by_name(summoner_name)
+        self.profile = get_summoner_info_by_name(self.summoner_name)
         self.id            = self.profile["id"]
         self.accountId     = self.profile["accountId"]
         self.puuid         = self.profile["puuid"]
@@ -206,12 +206,10 @@ class Summoner():
         save_dict(champions, "champions")
         save_dict(active_game, "active_game")
 
-asta = Summoner("Rattataaa")
+try:
+    summoner = Summoner(str(argv[1]))
+except:
+    summoner = Summoner(input("Summoner name: "))
 
 c = Console()
-"""
-c.print(asta.get_matches(5, Return=True))
-"""
-save_dict(asta.ranked_stats, "stats")
-a = asta.profile_stats()
-c.print(a)
+c.print(summoner.profile_stats())
