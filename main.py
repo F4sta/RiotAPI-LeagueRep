@@ -4,23 +4,12 @@ import json
 from constans import *
 from functions import *
 
+from shutil import get_terminal_size
 from rich.console import Console
 from rich.table import Table
 from rich.layout import Layout
 from rich.markdown import Markdown
 from rich.text import Text
-
-def save_all_champion_json():
-    
-    champions = requests.get("http://ddragon.leagueoflegends.com/cdn/13.21.1/data/en_US/champion.json").json()
-    for Champion in champions["data"]:
-        id = champions["data"][Champion]["id"]
-        name = champions["data"][Champion]["name"]
-        try:
-            Champion = requests.get(f"http://ddragon.leagueoflegends.com/cdn/13.21.1/data/en_US/champion/{id}.json").json()
-            save_dict(dict=Champion, name=f'{id}', save_folder="saved/Champions/")
-        except:
-            print(f"Couldnt save {name}.json")
 
 class Summoner():
 
@@ -46,22 +35,39 @@ class Summoner():
         self.ranked_stats = get_ranked_data(self.id, self.region_code)
         
         #Getting datas for solo/duo
-        self.ranked_solo = self.ranked_stats[1]
-        self.solo_queueType     = self.ranked_solo["queueType"]
-        self.solo_tier          = self.ranked_solo["tier"]
-        self.solo_rank          = self.ranked_solo["rank"]
-        self.solo_lp            = self.ranked_solo["leaguePoints"]
-        self.solo_wins          = self.ranked_solo["wins"]
-        self.solo_losses        = self.ranked_solo["losses"]
+        try:
+            self.ranked_solo = self.ranked_stats[0]
+            self.solo_queueType     = self.ranked_solo["queueType"]
+            self.solo_tier          = self.ranked_solo["tier"]
+            self.solo_rank          = self.ranked_solo["rank"]
+            self.solo_lp            = self.ranked_solo["leaguePoints"]
+            self.solo_wins          = self.ranked_solo["wins"]
+            self.solo_losses        = self.ranked_solo["losses"]
+        except IndexError:
+            self.flex_queueType     = ""
+            self.flex_tier          = ""
+            self.flex_rank          = ""
+            self.flex_lp            = ""
+            self.flex_wins          = ""
+            self.flex_losses        = ""
         
         #Getting datas for flex
-        self.ranked_flex = self.ranked_stats[0]
-        self.flex_queueType     = self.ranked_solo["queueType"]
-        self.flex_tier          = self.ranked_flex["tier"]
-        self.flex_rank          = self.ranked_flex["rank"]
-        self.flex_lp            = self.ranked_flex["leaguePoints"]
-        self.flex_wins          = self.ranked_flex["wins"]
-        self.flex_losses        = self.ranked_flex["losses"]
+        try:
+            self.ranked_flex = self.ranked_stats[1]
+            self.flex_queueType     = self.ranked_solo["queueType"]
+            self.flex_tier          = self.ranked_flex["tier"]
+            self.flex_rank          = self.ranked_flex["rank"]
+            self.flex_lp            = self.ranked_flex["leaguePoints"]
+            self.flex_wins          = self.ranked_flex["wins"]
+            self.flex_losses        = self.ranked_flex["losses"]
+        except IndexError:
+            self.flex_queueType     = ""
+            self.flex_tier          = ""
+            self.flex_rank          = ""
+            self.flex_lp            = ""
+            self.flex_wins          = ""
+            self.flex_losses        = ""
+            
         
     def check_active_game(self):
         game = get_active_game_by_user_id(self.id)
@@ -70,7 +76,6 @@ class Summoner():
         
     def get_matches(self,   
                         amount: int,
-                        match_detailed_name: bool = False,
                         save: bool = False,
                         Return = False
                     ):
@@ -120,8 +125,7 @@ class Summoner():
             
             if not match["win"]:
                 color = "red"
-            
-            match_id = match["matchId"]
+                
             champion = match["champion"]
             champLevel = match["champLevel"]
             kills = int(match["kills"])
@@ -137,28 +141,16 @@ class Summoner():
                 kda = (kills + assists)
             kda = round(kda, 2)
             
-            if not match_detailed_name:
-                table.add_row(
-                    f'({i + 1})',
-                    f'({champLevel}) {champion}',
-                    f'{kills} / {deaths} / {assists}',
-                    f'({kda})',
-                    f'{farm}',
-                    f'{totalDamageDealt}',
-                    f'{visionScore}'
-                    ,style=color
-                )
-            else:
-                table.add_row(
-                    f'({i + 1}) {match_id}',
-                    f'({champLevel}) {champion}',
-                    f'{kills} / {deaths} / {assists}',
-                    f'({kda})',
-                    f'{farm}',
-                    f'{totalDamageDealt}',
-                    f'{visionScore}'
-                    ,style=color
-                )
+            table.add_row(
+                f'({i + 1})',
+                f'({champLevel}) {champion}',
+                f'{kills} / {deaths} / {assists}',
+                f'({kda})',
+                f'{farm}',
+                f'{totalDamageDealt}',
+                f'{visionScore}'
+                ,style=color
+            )
         if not Return:
             c = Console()
             c.print(table)
@@ -182,9 +174,9 @@ class Summoner():
 """
         layout = Layout()
         layout.split_column(
-            Layout(renderable=Markdown(MARKDOWN)),
-            Layout(name="solo/duo", renderable=soloduo),
-            Layout(name="flex", renderable=flex),
+            Layout(renderable=Markdown(MARKDOWN), size=4),
+            Layout(name="solo/duo", renderable=soloduo, size=6),
+            Layout(name="flex", renderable=flex, size=6),
             Layout(name="match-history", renderable=self.get_matches(5, Return=True))
         )
         
@@ -212,4 +204,5 @@ except:
     summoner = Summoner(input("Summoner name: "))
 
 c = Console()
+summoner.save_some_data()
 c.print(summoner.profile_stats())

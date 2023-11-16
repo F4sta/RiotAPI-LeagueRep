@@ -40,6 +40,20 @@ def get_champion_data(champion: str):
     
     return riot_request(api_url, params)
 
+def save_all_champion_json():
+    """
+    Saves all the champions data
+    """
+    champions = requests.get("http://ddragon.leagueoflegends.com/cdn/13.21.1/data/en_US/champion.json").json()
+    for Champion in champions["data"]:
+        id = champions["data"][Champion]["id"]
+        name = champions["data"][Champion]["name"]
+        try:
+            Champion = requests.get(f"http://ddragon.leagueoflegends.com/cdn/13.21.1/data/en_US/champion/{id}.json").json()
+            save_dict(dict=Champion, name=f'{id}', save_folder="saved/Champions/")
+        except:
+            print(f"Couldnt save {name}.json")
+
 def get_summoner_icon_by_id(id: int | str):
     '''
     Returns the link for a specified icon by their id
