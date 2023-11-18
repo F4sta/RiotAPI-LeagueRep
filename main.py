@@ -79,12 +79,13 @@ class Summoner():
         if get_active_game_by_user_id(self.id) != None:return True
         else: return False
         
-    def get_matches(self,   
+    def get_matches_stats(self,   
                         amount: int,
                         save: bool = False,
-                        Return = False
+                        return_rich_table = False
                     ):
         
+        #Store match datas into list
         match_ids = get_match_ids_by_summoner_puuid(self.puuid, amount)
         match_infos = []
         
@@ -109,57 +110,58 @@ class Summoner():
                     "win"              : match["info"]["participants"][Index]["win"]
                 }
             )
-            
+        
         if save:
             save_dict(match_infos, f"{self.summoner_name}_{amount}_match_history")
             
-        table = Table(title=f"{self.summoner_name} - Match History")
+        if return_rich_table:
+            #create rich table
+            table = Table(title=f"{self.summoner_name} - Match History")
 
-        table.add_column("Match", justify="center", style="green", no_wrap=True)
-        table.add_column("Champion", justify="right", style="cyan")
-        table.add_column("Kda", justify="center", style="cyan")
-        table.add_column("-- II --", justify="center", style="cyan")
-        table.add_column("Creep Score", justify="center", style="cyan")
-        table.add_column("Total Dmg Dealt", justify="center", style="cyan")
-        table.add_column("Vision", justify="center", style="green")
-        
-        for match in match_infos:
-            i = match_infos.index(match)
-            color = "green"
+            table.add_column("Match", justify="center", style="green", no_wrap=True)
+            table.add_column("Champion", justify="right", style="cyan")
+            table.add_column("Kda", justify="center", style="cyan")
+            table.add_column("-- II --", justify="center", style="cyan")
+            table.add_column("Creep Score", justify="center", style="cyan")
+            table.add_column("Total Dmg Dealt", justify="center", style="cyan")
+            table.add_column("Vision", justify="center", style="green")
             
-            if not match["win"]:
-                color = "red"
+            for match in match_infos:
+                i = match_infos.index(match)
+                color = "green"
                 
-            champion = match["champion"]
-            champLevel = match["champLevel"]
-            kills = int(match["kills"])
-            deaths = int(match["deaths"])
-            assists = int(match["assists"])
-            farm = match["farm"]
-            totalDamageDealt = match["totalDamageDealt"]
-            visionScore = match["visionScore"]
+                if not match["win"]:
+                    color = "red"
+                    
+                champion = match["champion"]
+                champLevel = match["champLevel"]
+                kills = int(match["kills"])
+                deaths = int(match["deaths"])
+                assists = int(match["assists"])
+                farm = match["farm"]
+                totalDamageDealt = match["totalDamageDealt"]
+                visionScore = match["visionScore"]
+                
+                if not deaths == 0:
+                    kda = (kills + assists) / deaths
+                else:
+                    kda = (kills + assists)
+                kda = round(kda, 2)
+                
+                table.add_row(
+                    f'({i + 1})',
+                    f'({champLevel}) {champion}',
+                    f'{kills} / {deaths} / {assists}',
+                    f'({kda})',
+                    f'{farm}',
+                    f'{totalDamageDealt}',
+                    f'{visionScore}'
+                    ,style=color
+                )
+            return table
             
-            if not deaths == 0:
-                kda = (kills + assists) / deaths
-            else:
-                kda = (kills + assists)
-            kda = round(kda, 2)
-            
-            table.add_row(
-                f'({i + 1})',
-                f'({champLevel}) {champion}',
-                f'{kills} / {deaths} / {assists}',
-                f'({kda})',
-                f'{farm}',
-                f'{totalDamageDealt}',
-                f'{visionScore}'
-                ,style=color
-            )
-        if not Return:
-            c = Console()
-            c.print(table)
         else:
-            return(table)
+            return(match_infos)
         
     def profile_stats(self):
         MARKDOWN = f"""

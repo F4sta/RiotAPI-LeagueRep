@@ -131,7 +131,14 @@ def get_active_game_by_user_id(id: str, region_code: str = DEFAULT_REGION_CODE):
 
     api_url = f"https://{region_code}.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/{id}"
     
-    return riot_request(api_url, params)
+    try:
+        res = requests.get(api_url, params=urlencode(params))
+        res.raise_for_status()
+        return res.json()
+    except requests.exceptions.RequestException as e:
+        if res.status_code != 404:
+            print(e)
+        return None
 
 def get_ranked_data(id: str, region_code: str = DEFAULT_REGION_CODE):
     """
