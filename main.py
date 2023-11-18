@@ -124,7 +124,6 @@ class Summoner():
         table.add_column("Vision", justify="center", style="green")
         
         for match in match_infos:
-            
             i = match_infos.index(match)
             color = "green"
             
