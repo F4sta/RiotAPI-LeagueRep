@@ -32,47 +32,52 @@ class Summoner():
         self.profileIconId = self.profile["profileIconId"]
         self.revisionDate  = self.profile["revisionDate"]
 
+        #Getting datas about the summoner ranked performance
         self.ranked_stats = get_ranked_data(self.id, self.region_code)
-        
-        #Getting datas for solo/duo
-        try:
-            self.ranked_solo = self.ranked_stats[0]
-            self.solo_queueType     = self.ranked_solo["queueType"]
-            self.solo_tier          = self.ranked_solo["tier"]
-            self.solo_rank          = self.ranked_solo["rank"]
-            self.solo_lp            = self.ranked_solo["leaguePoints"]
-            self.solo_wins          = self.ranked_solo["wins"]
-            self.solo_losses        = self.ranked_solo["losses"]
-        except IndexError:
-            self.flex_queueType     = ""
-            self.flex_tier          = ""
-            self.flex_rank          = ""
-            self.flex_lp            = ""
-            self.flex_wins          = ""
-            self.flex_losses        = ""
-        
-        #Getting datas for flex
-        try:
-            self.ranked_flex = self.ranked_stats[1]
-            self.flex_queueType     = self.ranked_solo["queueType"]
-            self.flex_tier          = self.ranked_flex["tier"]
-            self.flex_rank          = self.ranked_flex["rank"]
-            self.flex_lp            = self.ranked_flex["leaguePoints"]
-            self.flex_wins          = self.ranked_flex["wins"]
-            self.flex_losses        = self.ranked_flex["losses"]
-        except IndexError:
-            self.flex_queueType     = ""
-            self.flex_tier          = ""
-            self.flex_rank          = ""
-            self.flex_lp            = ""
-            self.flex_wins          = ""
-            self.flex_losses        = ""
+        for i in range(2):
+            try:
+                self.data = self.ranked_stats[i]
+                
+                if self.data["queueType"] == "RANKED_SOLO_5x5":
+                    self.solo_queueType     = self.data["queueType"]
+                    self.solo_tier          = self.data["tier"]
+                    self.solo_rank          = self.data["rank"]
+                    self.solo_lp            = self.data["leaguePoints"]
+                    self.solo_wins          = self.data["wins"]
+                    self.solo_losses        = self.data["losses"]
+                    
+                elif self.data["queueType"] == "RANKED_FLEX_SR":
+                    self.flex_queueType     = self.data["queueType"]
+                    self.flex_tier          = self.data["tier"]
+                    self.flex_rank          = self.data["rank"]
+                    self.flex_lp            = self.data["leaguePoints"]
+                    self.flex_wins          = self.data["wins"]
+                    self.flex_losses        = self.data["losses"]
+            except:continue
             
+        try:
+            if self.solo_queueType == "RANKED_SOLO_5x5":pass
+        except:
+            self.solo_queueType     = ""
+            self.solo_tier          = ""
+            self.solo_rank          = ""
+            self.solo_lp            = ""
+            self.solo_wins          = ""
+            self.solo_losses        = ""
+                
+        try:
+            if self.flex_queueType == "RANKED_FLEX_SR":pass
+        except:
+            self.flex_queueType     = ""
+            self.flex_tier          = ""
+            self.flex_rank          = ""
+            self.flex_lp            = ""
+            self.flex_wins          = ""
+            self.flex_losses        = ""
         
     def check_active_game(self):
-        game = get_active_game_by_user_id(self.id)
-        if game:
-            print("There is an active game")
+        if get_active_game_by_user_id(self.id) != None:return True
+        else: return False
         
     def get_matches(self,   
                         amount: int,
@@ -158,6 +163,10 @@ class Summoner():
             return(table)
         
     def profile_stats(self):
+        MARKDOWN = f"""
+# {Text(f"{self.summoner_name} - {self.summonerLevel}", style="italic")}
+"""
+        markdown = Markdown(MARKDOWN)  
         
         soloduo = Table(title="Ranked Solo/Duo")
         soloduo.add_column("Rank", justify="left", style="cyan")
@@ -169,18 +178,7 @@ class Summoner():
         flex.add_column("Win / Lose", justify="center", style="cyan")
         flex.add_row(f"{self.flex_tier} {self.flex_rank} ({self.flex_lp})", f"{self.flex_wins} / {self.flex_losses}")
 
-        MARKDOWN = f"""
-# {Text(f"{self.summoner_name} - {self.summonerLevel}", style="italic")}
-"""
-        layout = Layout()
-        layout.split_column(
-            Layout(renderable=Markdown(MARKDOWN), size=4),
-            Layout(name="solo/duo", renderable=soloduo, size=6),
-            Layout(name="flex", renderable=flex, size=6),
-            Layout(name="match-history", renderable=self.get_matches(5, Return=True))
-        )
-        
-        return layout
+        return (markdown, soloduo, flex)
     
     def save_some_data(self):
         
@@ -205,4 +203,6 @@ except:
 
 c = Console()
 summoner.save_some_data()
-c.print(summoner.profile_stats())
+a = summoner.profile_stats()
+for o in a:
+    c.print(o)
