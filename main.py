@@ -191,7 +191,7 @@ class Summoner():
                 solo_color = "aquamarine1"
             case _:
                 solo_color = "white"
-       
+
         flex_color = None
         match self.flex_tier:
             case "BRONZE":
@@ -214,7 +214,7 @@ class Summoner():
                 flex_color = "aquamarine1"
             case _:
                 flex_color = "white"
-                             
+
         soloduo = Table(title="Ranked Solo/Duo")
         soloduo.add_column("Rank", justify="left", style=solo_color)
         soloduo.add_column("Win / Lose", justify="center", style=solo_color)
