@@ -167,16 +167,62 @@ class Summoner():
         MARKDOWN = f"""
 # {Text(f"{self.summoner_name} - {self.summonerLevel}", style="italic")}
 """
-        markdown = Markdown(MARKDOWN)  
-        
+        markdown = Markdown(MARKDOWN)
+
+        solo_color = None
+        match self.solo_tier:
+            case "BRONZE":
+                solo_color = "brown"
+            case "SILVER":
+                solo_color = "grey82"
+            case "GOLD":
+                solo_color = "gold3"
+            case "PLATINUM":
+                solo_color = "cyan"
+            case "EMERALD":
+                solo_color = "green"
+            case "DIAMOND":
+                solo_color = "dodger_blue2"
+            case "MASTER":
+                solo_color = "purple"
+            case "GRANDMASTER":
+                solo_color = "red"
+            case "CHALLENGER":
+                solo_color = "aquamarine1"
+            case _:
+                solo_color = "white"
+       
+        flex_color = None
+        match self.flex_tier:
+            case "BRONZE":
+                flex_color = "brown"
+            case "SILVER":
+                flex_color = "grey82"
+            case "GOLD":
+                flex_color = "gold3"
+            case "PLATINUM":
+                flex_color = "cyan"
+            case "EMERALD":
+                flex_color = "green"
+            case "DIAMOND":
+                flex_color = "dodger_blue2"
+            case "MASTER":
+                flex_color = "purple"
+            case "GRANDMASTER":
+                flex_color = "red"
+            case "CHALLENGER":
+                flex_color = "aquamarine1"
+            case _:
+                flex_color = "white"
+                             
         soloduo = Table(title="Ranked Solo/Duo")
-        soloduo.add_column("Rank", justify="left", style="cyan")
-        soloduo.add_column("Win / Lose", justify="center", style="cyan")
+        soloduo.add_column("Rank", justify="left", style=solo_color)
+        soloduo.add_column("Win / Lose", justify="center", style=solo_color)
         soloduo.add_row(f"{self.solo_tier} {self.solo_rank} ({self.solo_lp})", f"{self.solo_wins} / {self.solo_losses}")
         
         flex = Table(title="Ranked Flex")
-        flex.add_column("Rank", justify="left", style="cyan")
-        flex.add_column("Win / Lose", justify="center", style="cyan")
+        flex.add_column("Rank", justify="left", style=flex_color)
+        flex.add_column("Win / Lose", justify="center", style=flex_color)
         flex.add_row(f"{self.flex_tier} {self.flex_rank} ({self.flex_lp})", f"{self.flex_wins} / {self.flex_losses}")
 
         return (markdown, soloduo, flex)
