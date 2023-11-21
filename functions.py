@@ -136,7 +136,7 @@ def get_active_game_by_user_id(id: str, region_code: str = DEFAULT_REGION_CODE):
         res.raise_for_status()
         return res.json()
     except requests.exceptions.RequestException as e:
-        if res.status_code != 404:
+        if res.status_code not in [403, 404]:
             print(e)
         return None
 

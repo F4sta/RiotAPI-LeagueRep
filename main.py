@@ -11,6 +11,8 @@ from rich.layout import Layout
 from rich.markdown import Markdown
 from rich.text import Text
 
+from rich_pixels import Pixels
+
 class Summoner():
 
     def __init__(self,  summoner_name: str,
@@ -74,6 +76,50 @@ class Summoner():
             self.flex_lp            = ""
             self.flex_wins          = ""
             self.flex_losses        = ""
+
+        match self.solo_tier:
+            case "BRONZE":
+                self.solo_color = "brown"
+            case "SILVER":
+                self.solo_color = "grey82"
+            case "GOLD":
+                self.solo_color = "gold3"
+            case "PLATINUM":
+                self.solo_color = "cyan"
+            case "EMERALD":
+                self.solo_color = "green"
+            case "DIAMOND":
+                self.solo_color = "dodger_blue2"
+            case "MASTER":
+                self.solo_color = "purple"
+            case "GRANDMASTER":
+                self.solo_color = "red"
+            case "CHALLENGER":
+                self.solo_color = "aquamarine1"
+            case _:
+                self.solo_color = "white"
+
+        match self.flex_tier:
+            case "BRONZE":
+                self.flex_color = "brown"
+            case "SILVER":
+                self.flex_color = "grey82"
+            case "GOLD":
+                self.flex_color = "gold3"
+            case "PLATINUM":
+                self.flex_color = "cyan"
+            case "EMERALD":
+                self.flex_color = "green"
+            case "DIAMOND":
+                self.flex_color = "dodger_blue2"
+            case "MASTER":
+                self.flex_color = "purple"
+            case "GRANDMASTER":
+                self.flex_color = "red"
+            case "CHALLENGER":
+                self.flex_color = "aquamarine1"
+            case _:
+                self.flex_color = "white"
         
     def check_active_game(self):
         if get_active_game_by_user_id(self.id) != None:return True
@@ -105,7 +151,7 @@ class Summoner():
                     "farm"             :(int(match["info"]["participants"][Index]["totalMinionsKilled"]) +
                                         int(match["info"]["participants"][Index]["totalAllyJungleMinionsKilled"]) +
                                         int(match["info"]["participants"][Index]["totalEnemyJungleMinionsKilled"])),
-                    "totalDamageDealt" : match["info"]["participants"][Index]["totalDamageDealt"],    
+                    "totalDamageDealtToChampions" : match["info"]["participants"][Index]["totalDamageDealtToChampions"],    
                     "visionScore"      : match["info"]["participants"][Index]["visionScore"],
                     "win"              : match["info"]["participants"][Index]["win"]
                 }
@@ -139,7 +185,7 @@ class Summoner():
                 deaths = int(match["deaths"])
                 assists = int(match["assists"])
                 farm = match["farm"]
-                totalDamageDealt = match["totalDamageDealt"]
+                totalDamageDealt = match["totalDamageDealtToChampion"]
                 visionScore = match["visionScore"]
                 
                 if not deaths == 0:
@@ -169,60 +215,14 @@ class Summoner():
 """
         markdown = Markdown(MARKDOWN)
 
-        solo_color = None
-        match self.solo_tier:
-            case "BRONZE":
-                solo_color = "brown"
-            case "SILVER":
-                solo_color = "grey82"
-            case "GOLD":
-                solo_color = "gold3"
-            case "PLATINUM":
-                solo_color = "cyan"
-            case "EMERALD":
-                solo_color = "green"
-            case "DIAMOND":
-                solo_color = "dodger_blue2"
-            case "MASTER":
-                solo_color = "purple"
-            case "GRANDMASTER":
-                solo_color = "red"
-            case "CHALLENGER":
-                solo_color = "aquamarine1"
-            case _:
-                solo_color = "white"
-
-        flex_color = None
-        match self.flex_tier:
-            case "BRONZE":
-                flex_color = "brown"
-            case "SILVER":
-                flex_color = "grey82"
-            case "GOLD":
-                flex_color = "gold3"
-            case "PLATINUM":
-                flex_color = "cyan"
-            case "EMERALD":
-                flex_color = "green"
-            case "DIAMOND":
-                flex_color = "dodger_blue2"
-            case "MASTER":
-                flex_color = "purple"
-            case "GRANDMASTER":
-                flex_color = "red"
-            case "CHALLENGER":
-                flex_color = "aquamarine1"
-            case _:
-                flex_color = "white"
-
         soloduo = Table(title="Ranked Solo/Duo")
-        soloduo.add_column("Rank", justify="left", style=solo_color)
-        soloduo.add_column("Win / Lose", justify="center", style=solo_color)
+        soloduo.add_column("Rank", justify="left", style=self.solo_color)
+        soloduo.add_column("Win / Lose", justify="center", style=self.solo_color)
         soloduo.add_row(f"{self.solo_tier} {self.solo_rank} ({self.solo_lp})", f"{self.solo_wins} / {self.solo_losses}")
         
         flex = Table(title="Ranked Flex")
-        flex.add_column("Rank", justify="left", style=flex_color)
-        flex.add_column("Win / Lose", justify="center", style=flex_color)
+        flex.add_column("Rank", justify="left", style=self.flex_color)
+        flex.add_column("Win / Lose", justify="center", style=self.flex_color)
         flex.add_row(f"{self.flex_tier} {self.flex_rank} ({self.flex_lp})", f"{self.flex_wins} / {self.flex_losses}")
 
         return (markdown, soloduo, flex)
@@ -243,13 +243,17 @@ class Summoner():
         save_dict(champions, "champions")
         save_dict(active_game, "active_game")
 
-try:
-    summoner = Summoner(str(argv[1]))
-except:
-    summoner = Summoner(input("Summoner name: "))
+def main():
+    try:
+        summoner = Summoner(str(argv[1]))
+    except:
+        summoner = Summoner(input("Summoner name: "))
 
-c = Console()
-summoner.save_some_data()
-a = summoner.profile_stats()
-for o in a:
-    c.print(o)
+    c = Console()
+    summoner.save_some_data()
+    a = summoner.profile_stats()
+    for o in a:
+        c.print(o)
+        
+if __name__ == "__main__":
+    main()
