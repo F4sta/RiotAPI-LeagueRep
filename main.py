@@ -11,8 +11,6 @@ from rich.layout import Layout
 from rich.markdown import Markdown
 from rich.text import Text
 
-from rich_pixels import Pixels
-
 class Summoner():
 
     def __init__(self,  summoner_name: str,
@@ -243,17 +241,25 @@ class Summoner():
         save_dict(champions, "champions")
         save_dict(active_game, "active_game")
 
-def main():
-    try:
-        summoner = Summoner(str(argv[1]))
-    except:
-        summoner = Summoner(input("Summoner name: "))
-
-    c = Console()
-    summoner.save_some_data()
+def subfunc(summoner, c):
+    
     a = summoner.profile_stats()
     for o in a:
         c.print(o)
+
+def main():
+    c = Console()
+    try:
+        summoners = [i for i in argv]
+        summoners.remove(summoners[0])
+        print(summoners)
+        for summoner in summoners:
+            s = Summoner(summoner)
+            subfunc(s, c)
+            del(s)
+    except:
+        summoner = Summoner(input("Summoner name: "))
+        subfunc(summoner, c)
         
 if __name__ == "__main__":
     main()
