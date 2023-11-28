@@ -171,9 +171,7 @@ class Summoner():
             table.add_column("Vision", justify="center", style="green")
             
             for match in match_infos:
-                i = match_infos.index(match)
-                color = "green"
-                
+                color = "green"                
                 if not match["win"]:
                     color = "red"
                     
@@ -193,7 +191,7 @@ class Summoner():
                 kda = round(kda, 2)
                 
                 table.add_row(
-                    f'({i + 1})',
+                    f'({match_infos.index(match) + 1})',
                     f'({champLevel}) {champion}',
                     f'{kills} / {deaths} / {assists}',
                     f'({kda})',
@@ -242,24 +240,35 @@ class Summoner():
         save_dict(active_game, "active_game")
 
 def subfunc(summoner, c):
-    
     a = summoner.profile_stats()
     for o in a:
         c.print(o)
+    summoner.get_matches_stats(5)
+    del(summoner)
 
 def main():
     c = Console()
     try:
-        summoners = [i for i in argv]
-        summoners.remove(summoners[0])
-        print(summoners)
+    
+        if argv[1] == "--group" or argv[1] == "-g":
+            group = argv[2]
+            with open(group, "r", encoding="utf-8") as group:
+                summoners = []
+                for i in group.readlines():
+                    try:
+                        i = i.removesuffix("\n")
+                        summoners.append(i)
+                    except:
+                        summoners.append(i)
+        else:   
+            summoners = [i for i in argv]
+            summoners.remove(summoners[0])
         for summoner in summoners:
-            s = Summoner(summoner)
-            subfunc(s, c)
-            del(s)
-    except:
-        summoner = Summoner(input("Summoner name: "))
-        subfunc(summoner, c)
+            subfunc(Summoner(summoner), c)
+    except Exception as e:
+        s = subfunc(Summoner(input("Summoner name: ")), c)
+        subfunc(s, c)
+        
         
 if __name__ == "__main__":
     main()
