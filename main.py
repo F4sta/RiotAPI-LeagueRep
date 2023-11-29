@@ -53,7 +53,8 @@ class Summoner():
                     self.flex_lp            = self.data["leaguePoints"]
                     self.flex_wins          = self.data["wins"]
                     self.flex_losses        = self.data["losses"]
-            except:continue
+            except:
+                continue
             
         try:
             if self.solo_queueType == "RANKED_SOLO_5x5":pass
@@ -137,10 +138,12 @@ class Summoner():
             match = get_match_data_by_match_id(match_id)
             participants: list = match["metadata"]["participants"]
             Index = participants.index(self.puuid)
-            
+
+            #Append all data for each match
             match_infos.append(
                 {
                     "matchId"          : match["metadata"]["matchId"],
+                    "gamemode"          : get_gamemode_by_queue_id(match["info"]["queueId"]),
                     "champion"         : match["info"]["participants"][Index]["championName"],
                     "champLevel"       : match["info"]["participants"][Index]["champLevel"],
                     "kills"            : match["info"]["participants"][Index]["kills"],
@@ -163,6 +166,7 @@ class Summoner():
             table = Table(title=f"{self.summoner_name} - Match History")
 
             table.add_column("Match", justify="center", style="green", no_wrap=True)
+            table.add_column("Gamemode", justify="center", style="cyan")
             table.add_column("Champion", justify="right", style="cyan")
             table.add_column("Kda", justify="center", style="cyan")
             table.add_column("-- II --", justify="center", style="cyan")
@@ -175,13 +179,15 @@ class Summoner():
                 if not match["win"]:
                     color = "red"
                     
+                #remove variables and replace them into table.add_row for performance
                 champion = match["champion"]
+                gamemode = match["gamemode"]
                 champLevel = match["champLevel"]
                 kills = int(match["kills"])
                 deaths = int(match["deaths"])
                 assists = int(match["assists"])
                 farm = match["farm"]
-                totalDamageDealt = match["totalDamageDealtToChampion"]
+                totalDamageDealt = match["totalDamageDealtToChampions"]
                 visionScore = match["visionScore"]
                 
                 if not deaths == 0:
@@ -191,10 +197,11 @@ class Summoner():
                 kda = round(kda, 2)
                 
                 table.add_row(
-                    f'({match_infos.index(match) + 1})',
+                    f'{match_infos.index(match) + 1}',
+                    f'{gamemode}',
                     f'({champLevel}) {champion}',
                     f'{kills} / {deaths} / {assists}',
-                    f'({kda})',
+                    f'{kda}',
                     f'{farm}',
                     f'{totalDamageDealt}',
                     f'{visionScore}'
@@ -239,36 +246,44 @@ class Summoner():
         save_dict(champions, "champions")
         save_dict(active_game, "active_game")
 
-def subfunc(summoner, c):
-    a = summoner.profile_stats()
-    for o in a:
-        c.print(o)
-    summoner.get_matches_stats(5)
-    del(summoner)
-
-def main():
-    c = Console()
-    try:
     
-        if argv[1] == "--group" or argv[1] == "-g":
-            group = argv[2]
-            with open(group, "r", encoding="utf-8") as group:
-                summoners = []
-                for i in group.readlines():
-                    try:
-                        i = i.removesuffix("\n")
-                        summoners.append(i)
-                    except:
-                        summoners.append(i)
-        else:   
-            summoners = [i for i in argv]
-            summoners.remove(summoners[0])
-        for summoner in summoners:
-            subfunc(Summoner(summoner), c)
-    except Exception as e:
-        s = subfunc(Summoner(input("Summoner name: ")), c)
-        subfunc(s, c)
-        
         
 if __name__ == "__main__":
+    
+    def subfunc(summoner, c: Console):
+        summoner = Summoner(summoner)
+        a = summoner.profile_stats()
+        for o in a:
+            c.print(o)
+        c.print(summoner.get_matches_stats(5, return_rich_table=True))
+        del(summoner)
+        
+    def main():
+        c = Console()
+    
+        if len(argv) > 1:   
+
+            if argv[1] == "--group" or argv[1] == "-g":
+                group = argv[2]
+                with open(group, "r", encoding="utf-8") as group:
+                    summoners = []
+                    for i in group.readlines():
+                        try:
+                            i = i.removesuffix("\n")
+                            summoners.append(i)
+                        except:
+                            summoners.append(i)
+
+            else:
+                summoners = [i for i in argv]
+                summoners.remove(summoners[0])
+            
+            if summoners:
+                for summoner in summoners:
+                    subfunc(summoner, c)
+                    
+        else:
+            s = input("Summoner name: ")
+            subfunc(s, c)
+
     main()

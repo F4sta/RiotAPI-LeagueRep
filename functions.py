@@ -58,19 +58,13 @@ def get_summoner_icon_by_id(id: int | str):
     '''
     Returns the link for a specified icon by their id
     '''
-    if not id:
-        id = input("Icon ID: ")
-        
-    api_url = f"http://ddragon.leagueoflegends.com/cdn/13.21.1/img/profileicon/{id}.png"
-    
-    return requests.get(api_url).json()
+    return f"http://ddragon.leagueoflegends.com/cdn/13.21.1/img/profileicon/{id}.png"
+
 
 def get_summoner_info_by_name(summoner_name: str = None, region_code: str = DEFAULT_REGION_CODE):
     '''
     Gets infromation about a summoner by their name
     '''
-    if not summoner_name:
-        summoner_name = input("Enter summoner namme: ")
         
     params = {
         "api_key" : API_KEY
@@ -92,8 +86,6 @@ def get_match_ids_by_summoner_puuid(puuid: str, matches_count: int = 20, region:
     Example:
         get_match_ids_by_summoner_puuid(sample_puuid, 100, "europe")
     '''
-    if not puuid:
-        puuid = input("Enter summoner PUUID: ")   
     params = {
         "api_key" : API_KEY,
         "count" : matches_count
@@ -107,8 +99,6 @@ def get_match_data_by_match_id(match_id: str, region: str = DEFAULT_REGION):
     ''' 
     Gets data from a specific match by its id
     '''
-    if not match_id:
-        match_id = input("Enter match ID: ")
         
     params = {
         "api_key" : API_KEY
@@ -122,8 +112,6 @@ def get_active_game_by_user_id(id: str, region_code: str = DEFAULT_REGION_CODE):
     '''
     Checks if a summoner is ingame by their id
     '''
-    if not id:
-        id = input("Enter user ID: ")
         
     params = {
         "api_key" : API_KEY
@@ -153,6 +141,14 @@ def get_ranked_data(id: str, region_code: str = DEFAULT_REGION_CODE):
 
     return riot_request(api_url, params)
 
+def get_gamemode_by_queue_id(queueId: str):
+
+    url = f"https://static.developer.riotgames.com/docs/lol/queues.json"
+    
+    queues_dict = requests.get(url).json()
+    for queue_info in queues_dict:
+        if queue_info["queueId"] == queueId:
+            return queue_info["description"]
 
 
 '''
