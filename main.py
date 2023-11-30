@@ -261,8 +261,20 @@ if __name__ == "__main__":
     def main():
         c = Console()
     
-        if len(argv) > 1:   
+        if len(argv) > 1: 
 
+            argv.remove("main.py")
+            argv_keys = [key for key in argv if argv.index(key) % 2 == 0]
+            argv_values = [argv[argv.index(key)+1] for key in argv if argv.index(key) % 2 == 0]
+            argv_values = []
+            for key in argv_keys:
+                argv_values.append(argv[argv.index(key)+1])
+            
+            argv_dict = dict((argv_keys, argv_values))
+            
+            print(argv_dict)
+
+            """
             if argv[1] == "--group" or argv[1] == "-g":
                 group = argv[2]
                 with open(group, "r", encoding="utf-8") as group:
@@ -281,7 +293,7 @@ if __name__ == "__main__":
             if summoners:
                 for summoner in summoners:
                     subfunc(summoner, c)
-                    
+             """       
         else:
             s = input("Summoner name: ")
             subfunc(s, c)
