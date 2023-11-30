@@ -54,7 +54,7 @@ def save_all_champion_json():
         except:
             print(f"Couldnt save {name}.json")
 
-def get_summoner_icon_by_id(id: int | str):
+def get_summoner_icon_by_id(id: int):
     '''
     Returns the link for a specified icon by their id
     '''

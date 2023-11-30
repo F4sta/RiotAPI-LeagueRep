@@ -245,11 +245,9 @@ class Summoner():
         save_dict(items, "items")
         save_dict(champions, "champions")
         save_dict(active_game, "active_game")
-
-    
         
 if __name__ == "__main__":
-    
+
     def subfunc(summoner, c: Console):
         summoner = Summoner(summoner)
         a = summoner.profile_stats()
@@ -263,37 +261,34 @@ if __name__ == "__main__":
     
         if len(argv) > 1: 
 
-            argv.remove("main.py")
+            mainname = __file__.split("\\")[-1]
+            argv.remove(f"{mainname}")
             argv_keys = [key for key in argv if argv.index(key) % 2 == 0]
-            argv_values = [argv[argv.index(key)+1] for key in argv if argv.index(key) % 2 == 0]
-            argv_values = []
-            for key in argv_keys:
-                argv_values.append(argv[argv.index(key)+1])
+            argv_values = [key for key in argv if argv.index(key) % 2 == 1]
             
-            argv_dict = dict((argv_keys, argv_values))
-            
-            print(argv_dict)
+            argv_dict = {argv_keys[i]: argv_values[i] for i in range(len(argv_keys))}
+            del(argv_keys, argv_values)
 
-            """
-            if argv[1] == "--group" or argv[1] == "-g":
-                group = argv[2]
-                with open(group, "r", encoding="utf-8") as group:
-                    summoners = []
-                    for i in group.readlines():
-                        try:
-                            i = i.removesuffix("\n")
-                            summoners.append(i)
-                        except:
-                            summoners.append(i)
-
-            else:
-                summoners = [i for i in argv]
-                summoners.remove(summoners[0])
+            summoners = []
+            for key, value in argv_dict.items():
+                print(key, value)
+                match key:
+                    case "-sn" | "--summonername":
+                        summoners.append(value)
+                        
+                    case "-gr" | "--group":
+                        with open(value, "r", encoding="utf-8") as group:
+                            for i in group.readlines():
+                                try:
+                                    i = i.removesuffix("\n")
+                                    summoners.append(i)
+                                except:
+                                    summoners.append(i)
             
-            if summoners:
-                for summoner in summoners:
-                    subfunc(summoner, c)
-             """       
+        if len(summoners)> 0:
+            for s in summoners:
+                subfunc(s, c)
+                        
         else:
             s = input("Summoner name: ")
             subfunc(s, c)
